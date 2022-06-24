@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -445,6 +444,7 @@ ul {
         <!-- Content wrapper end -->
     
         <script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/push.js/0.0.11/push.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" referrerpolicy="no-referrer"></script>
         <script>
             let peer = null;
@@ -574,7 +574,9 @@ ul {
             // とりあえずチャットボット
             const chat = [
                 "Thank you for your inquiry.Please confirm before using.Since our shop is an esthetic shop There is no sex act. We ask that our customers be completely passive.",
-                ["Yes", "No"],
+                "What day and what time do you want to use it?",
+                "I'm very sorry. We cannot guide you at our shop. If you want GFE services which includes Kissing, Blowjob, etc..., there are number five in the series. https://www.shinagawa-five.jp/en/ We look forward to hearing from you.",
+                ["10-14", "14-18", "18-22", "22-26"],
                 "3つ目のメッセージだよー！君の返信のタイミングで送信しているよ！",
                 "4つ目のメッセージだよー！そろそろ解決しそうだよね？",
                 "ラストのメッセージだよ。この後は有人対応に切り替わるよ"
@@ -638,13 +640,44 @@ ul {
                     chatBtn.disabled = true;
                     setTimeout( () => {
                         chatBtn.disabled = false;
+                        li.classList.add('chat-right', 'question-confirm');
+                        div.classList.add('chat-text');
+                        p.classList.add('chat-text-btn');
+                        div.classList.add('chat-avatar');
+                        ul.appendChild(li);
+                        li.appendChild(div);
+                        $(div).append('<p class="btn choice-no">' + chat[3][0] + '</p>','<p class="btn choice-yes">Yes</p>')
+                        // ロボットのトークカウントに足す
+                        chatCount++;
+                    }, 2000)
+                }
+            }
+
+            // 2番目のチャットを表示させる用の関数
+            function outputQuestion2(val, person) {
+                const ul = document.getElementById("chat_box");
+                const li = document.createElement("li");
+                // このDivにテキストを指定しますよ
+                const div = document.createElement('div');
+                div.textContent = val;
+                const p = document.createElement('p');
+
+                if(person === 'me') {
+                    div.classList.add('chat-left');
+                    li.classList.add('left');
+                    ul.appendChild(li);
+                    li.appendChild(div);
+                } else if( person === 'robot') {
+                    // ロボットが連続送信するときは返信できないようにする
+                    chatBtn.disabled = true;
+                    setTimeout( () => {
+                        chatBtn.disabled = false;
                         li.classList.add('chat-right');
                         div.classList.add('chat-text');
                         p.classList.add('chat-text-btn');
                         div.classList.add('chat-avatar');
                         ul.appendChild(li);
                         li.appendChild(div);
-                        div.appendChild(p);
                         // ロボットのトークカウントに足す
                         chatCount++;
                     }, 2000)
@@ -720,10 +753,20 @@ ul {
             // 最初はチャットボットに話しかけられる
             output(chat[0], "robot");
             setTimeout(() => {
-                outputBtn(chat[1], "robot")
+                outputBtn("", "robot")
             }, 3000);
 
-            console.log(chat[1][0]);
+            // yes noを押したときの処理⓵ 
+            $(document).on("click", ".question-confirm .btn.choice-yes", function() {
+                outputQuestion2(chat[1], "robot");
+                $(".question-confirm .btn.choice-yes").addClass("clicked");
+            })
+
+            $(document).on("click", ".question-confirm .btn.choice-no", function() {
+                outputQuestion2(chat[2], "robot");
+                $(".question-confirm .btn.choice-no").addClass("clicked");
+            })
+
         </script>
     </div>
 </body>

@@ -1,0 +1,8 @@
+li.chat-right .chat-text {
+    background-color: #323252!important;
+    color: #fff;
+}
+
+.chat-container li.chat-right > .chat-text:before {
+    border-color: transparent transparent transparent #323252;
+}

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="./chat1.css">
     <style>
         body{margin-top:20px;}
 /*************** 1.Variables ***************/
@@ -418,13 +421,14 @@ ul {
     
                         <!-- Row start -->
                         <div class="row no-gutters">
-                            <div class="col-xl-8 col-lg-8 col-md-8 col-sm-9 col-9">
+                            <div class="col-xl-12 col-lg-8 col-md-8 col-sm-9 col-9">
                                 <div class="chat-container">
                                     <ul class="chat-box chatContainerScroll" id="chat_box">
                                         
                                     </ul>
                                     <div class="form-group mt-3 mb-0">
                                         <input type="text" class="form-control" placeholder="Type your message here..." id="sendMessageBox"></input>
+                                        <button class="btn btn-primary" id="send-btn">SEND</button>
                                     </div>
                                 </div>
                             </div>
@@ -460,11 +464,12 @@ ul {
 
                 peer.on('connection', function(con2) {
                     con2.on('open', function(){
-                        con2.send('con2 does not accept')
+                        con2.send('con2 does not accept');
+                        // chatBotMessage();
                     });
                     setTimeout(function() {
                         con2.close();
-                    }, 500)
+                    }, 500);
                 });
 
                 peer.on('disconnected', function() {
@@ -490,9 +495,19 @@ ul {
                 }
 
                 conn = peer.connect($('#receiver-id').val());
+                conn.on('data', function(data) {
+                    console.log(data);
+                    $('#status').html('Connect to ' + conn.peer);
+                })
 
                 conn.on('open', function() {
                     $('#status').html('Connect to ' + conn.peer);
+                    alert("繋がったよ♡");
+
+                    conn.on('data', data => {
+                        chatBotMessage();
+                        console.log(`クライアント２からメッセージアリ！： ${data}`);
+                    })
                 })
 
                 conn.on('data', function(data){
@@ -500,6 +515,7 @@ ul {
                 })
             }
 
+            // メッセージ送信
             function addMessage(msg, side) {
                 var now = new Date();
                 var h = now.getHours();
@@ -534,25 +550,180 @@ ul {
                 $('#chat_box').append(msgHtml.join(""));
             }
 
+            // $(document).ready(function() {
+            //     init();
+            //     $('#connect-btn').on('click', function() {
+            //         join();
+            //     });
+
+            //     $('#sendMessageBox').keydown(function(key) {
+            //         if(key.keyCode == 13) {
+            //             if(conn && conn.open) {
+            //                 var msg = $('#sendMessageBox').val();
+            //                 $('#sendMessageBox').val('');
+            //                 conn.send(msg);
+            //                 addMessage(msg, "left");
+            //                 // chatBotMessage("left");
+            //             } else {
+            //                 $('#status').html('Connection is closed');
+            //             }
+            //         }
+            //     });
+            // });
+
+            // とりあえずチャットボット
+            const chat = [
+                "Thank you for your inquiry.Please confirm before using.Since our shop is an esthetic shop There is no sex act. We ask that our customers be completely passive.",
+                ["Yes", "No"],
+                "3つ目のメッセージだよー！君の返信のタイミングで送信しているよ！",
+                "4つ目のメッセージだよー！そろそろ解決しそうだよね？",
+                "ラストのメッセージだよ。この後は有人対応に切り替わるよ"
+            ];
+
+            let chatCount = 0;
+
+            // テキスト用の関数
+            function output(val, person) {
+                // 一番下までスクロールするよ
+                const field = document.getElementsByClassName("chat-container");
+                // field.scroll(0, field.scrolleight - field.clientHeight);
+
+                const ul = document.getElementById("chat_box");
+                const li = document.createElement("li");
+                // このDivにテキストを指定しますよ
+                const div = document.createElement('div');
+                div.textContent = val;
+
+                if(person === 'me') {
+                    div.classList.add('chat-left');
+                    li.classList.add('left');
+                    ul.appendChild(li);
+                    li.appendChild(div);
+                } else if( person === 'robot') {
+                    // ロボットが連続送信するときは返信できないようにする
+                    chatBtn.disabled = true;
+                    setTimeout( () => {
+                        chatBtn.disabled = false;
+                        li.classList.add('chat-right');
+                        div.classList.add('chat-text');
+                        div.classList.add('chat-avatar');
+                        ul.appendChild(li);
+                        li.appendChild(div);
+                        // ロボットのトークカウントに足す
+                        chatCount++;
+                    }, 2000)
+                }
+            }
+
+            // ボタンを表示させる用の関数
+            function outputBtn(val, person) {
+                // 一番下までスクロールするよ
+                const field = document.getElementsByClassName("chat-container");
+                // field.scroll(0, field.scrolleight - field.clientHeight);
+
+                const ul = document.getElementById("chat_box");
+                const li = document.createElement("li");
+                // このDivにテキストを指定しますよ
+                const div = document.createElement('div');
+                div.textContent = val;
+                const p = document.createElement('p');
+
+                if(person === 'me') {
+                    div.classList.add('chat-left');
+                    li.classList.add('left');
+                    ul.appendChild(li);
+                    li.appendChild(div);
+                } else if( person === 'robot') {
+                    // ロボットが連続送信するときは返信できないようにする
+                    chatBtn.disabled = true;
+                    setTimeout( () => {
+                        chatBtn.disabled = false;
+                        li.classList.add('chat-right');
+                        div.classList.add('chat-text');
+                        p.classList.add('chat-text-btn');
+                        div.classList.add('chat-avatar');
+                        ul.appendChild(li);
+                        li.appendChild(div);
+                        div.appendChild(p);
+                        // ロボットのトークカウントに足す
+                        chatCount++;
+                    }, 2000)
+                }
+            }
+
+            const chatBtn = document.getElementById("connect-btn");
+            const inputText = document.getElementById("sendMessageBox");
+
+
+            // メッセージを送信したときの処理
             $(document).ready(function() {
                 init();
                 $('#connect-btn').on('click', function() {
                     join();
                 });
 
-                $('#sendMessageBox').keydown(function(key) {
-                    if(key.keyCode == 13) {
-                        if(conn && conn.open) {
+                // $('#sendMessageBox').keydown(function(key) {
+                //     if(key.keyCode == 13) {
+                //         if(conn && conn.open) {
+                //             var msg = $('#sendMessageBox').val();
+                //             $('#sendMessageBox').val('');
+                //             conn.send(msg);
+                //             addMessage(msg, "left");
+                //             console.log(msg);
+
+                //             // ロボットの送信の合計回数に応じて次の返信をする
+                //             switch(chatCount) {
+                //                 case 2: 
+                //                     output(chat[2], "robot");
+                //                     break;
+                //                 case 3: 
+                //                     output(chat[3], "robot");
+                //                     break
+                //                 case 4: 
+                //                     output(chat[4], "robot");
+                //                     break
+                //             }
+                //         } else {
+                //             $('#status').html('Connection is closed');
+                //         }
+                //     }
+                // });
+
+                // キーダウンからSENDボタンクリックのイベントに変更する
+                // ↑上のkeydownイベントは不要かも
+                $("#send-btn").on('click', function(){
+                    if(conn && conn.open) {
                             var msg = $('#sendMessageBox').val();
                             $('#sendMessageBox').val('');
                             conn.send(msg);
                             addMessage(msg, "left");
+                            console.log(msg);
+
+                            // ロボットの送信の合計回数に応じて次の返信をする
+                            switch(chatCount) {
+                                case 2: 
+                                    output(chat[2], "robot");
+                                    break;
+                                case 3: 
+                                    output(chat[3], "robot");
+                                    break
+                                case 4: 
+                                    output(chat[4], "robot");
+                                    break
+                            }
                         } else {
                             $('#status').html('Connection is closed');
                         }
-                    }
-                });
+                })
             });
+
+            // 最初はチャットボットに話しかけられる
+            output(chat[0], "robot");
+            setTimeout(() => {
+                outputBtn(chat[1], "robot")
+            }, 3000);
+
+            console.log(chat[1][0]);
         </script>
     </div>
 </body>
